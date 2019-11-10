@@ -127,6 +127,7 @@
             })
 
             function setValue(newValue, updateInput) {
+                var isChanged = false
                 if (updateInput === undefined) {
                     updateInput = true
                 }
@@ -135,6 +136,7 @@
                     if (updateInput) {
                         $input[0].value = ""
                     }
+                    isChanged = value != NaN
                     value = NaN
                 } else {
                     newValue = parseFloat(newValue)
@@ -144,8 +146,10 @@
                     if (updateInput) {
                         $input[0].value = numberFormat.format(newValue)
                     }
+                    isChanged = value != newValue
                     value = newValue
                 }
+                return isChanged
             }
 
             function dispatchEvent($element, type, direction) {
@@ -194,10 +198,13 @@
                 if (isNaN(value)) {
                     value = 0
                 }
-                setValue(Math.round(value / step) * step + step)
-                var direction = step > 0 ? 1 : step < 0 ? -1 : 0
-                dispatchEvent($original, "input", direction)
-                dispatchEvent($original, "change", direction)
+                var isChanged = setValue(Math.round(value / step) * step + step)
+                
+                if (isChanged) {
+                    var direction = step > 0 ? 1 : step < 0 ? -1 : 0
+                    dispatchEvent($original, "input", direction)
+                    dispatchEvent($original, "change", direction)
+                }
             }
 
             function resetTimer() {
