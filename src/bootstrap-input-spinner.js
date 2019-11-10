@@ -34,7 +34,8 @@
             autoInterval: 100, // speed of auto value change
             boostThreshold: 10, // boost after these steps
             boostMultiplier: "auto", // you can also set a constant number as multiplier
-            locale: null // the locale for number rendering; if null, the browsers language is used
+            locale: null, // the locale for number rendering; if null, the browsers language is used
+            readOnlyInputs: false // make the text input disabled, while still allowing stepping
         }
         for (var option in options) {
             config[option] = options[option]
@@ -44,7 +45,7 @@
             '<div class="input-group-prepend">' +
             '<button style="min-width: ' + config.buttonsWidth + '" class="btn btn-decrement ' + config.buttonsClass + '" type="button">' + config.decrementButton + '</button>' +
             '</div>' +
-            '<input type="text" style="text-align: ' + config.textAlign + '" class="form-control"/>' +
+            '<input type="text" style="text-align: ' + config.textAlign + '" class="form-control"' + (config.readOnlyInputs ? " disabled" : "") + '/>' +
             '<div class="input-group-append">' +
             '<button style="min-width: ' + config.buttonsWidth + '" class="btn btn-increment ' + config.buttonsClass + '" type="button">' + config.incrementButton + '</button>' +
             '</div>' +
@@ -147,15 +148,15 @@
                 }
             }
 
-            function dispatchEvent($element, type) {
+            function dispatchEvent($element, type, direction) {
                 if (type) {
                     setTimeout(function () {
                         var event
-                        if (typeof (Event) === 'function') {
-                            event = new Event(type, {bubbles: true})
+                        if (typeof (CustomEvent) === 'function') {
+                            event = new CustomEvent(type, {bubbles: true, detail: {direction: direction}})
                         } else { // IE
                             event = document.createEvent('Event')
-                            event.initEvent(type, true, true)
+                            event.initEvent(type, true, true, {direction: direction})
                         }
                         $element[0].dispatchEvent(event)
                     })
@@ -163,7 +164,7 @@
             }
 
             function stepHandling(step) {
-                if (!$input[0].disabled && !$input[0].readOnly) {
+                if (config.readOnlyInputs || (!$input[0].disabled && !$input[0].readOnly)) {
                     calcStep(step)
                     resetTimer()
                     autoDelayHandler = setTimeout(function () {
@@ -194,8 +195,9 @@
                     value = 0
                 }
                 setValue(Math.round(value / step) * step + step)
-                dispatchEvent($original, "input")
-                dispatchEvent($original, "change")
+                var direction = step > 0 ? 1 : step < 0 ? -1 : 0
+                dispatchEvent($original, "input", direction)
+                dispatchEvent($original, "change", direction)
             }
 
             function resetTimer() {
@@ -209,13 +211,13 @@
                 // copy properties from original to the new input
                 $input.prop("required", $original.prop("required"))
                 $input.prop("placeholder", $original.prop("placeholder"))
-                var disabled = $original.prop("disabled")
+                var disabled = config.readOnlyInputs || $original.prop("disabled")
                 var readonly = $original.prop("readonly")
                 $input.prop("disabled", disabled)
                 $input.prop("readonly", readonly)
-                $buttonIncrement.prop("disabled", disabled || readonly)
-                $buttonDecrement.prop("disabled", disabled || readonly)
-                if (disabled || readonly) {
+                $buttonIncrement.prop("disabled", !config.readOnlyInputs && (disabled || readonly))
+                $buttonDecrement.prop("disabled", !config.readOnlyInputs && (disabled || readonly))
+                if (!config.readOnlyInputs && (disabled || readonly)) {
                     resetTimer()
                 }
                 var originalClass = $original.prop("class")
