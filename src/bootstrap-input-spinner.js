@@ -27,6 +27,7 @@
             decrementButton: "<strong>-</strong>", // button text
             incrementButton: "<strong>+</strong>", // ..
             groupClass: "", // css class of the resulting input-group
+            inputClass: "", // css class of the resulting text input
             buttonsClass: "btn-outline-secondary",
             buttonsWidth: "2.5rem",
             textAlign: "center",
@@ -45,7 +46,7 @@
             '<div class="input-group-prepend">' +
             '<button style="min-width: ' + config.buttonsWidth + '" class="btn btn-decrement ' + config.buttonsClass + '" type="button">' + config.decrementButton + '</button>' +
             '</div>' +
-            '<input type="text" style="text-align: ' + config.textAlign + '" class="form-control"' + (config.readOnlyInputs ? " disabled" : "") + '/>' +
+            '<input type="text" style="text-align: ' + config.textAlign + '" class="form-control ' + config.inputClass + '"' + (config.readOnlyInputs ? " disabled" : "") + '/>' +
             '<div class="input-group-append">' +
             '<button style="min-width: ' + config.buttonsWidth + '" class="btn btn-increment ' + config.buttonsClass + '" type="button">' + config.incrementButton + '</button>' +
             '</div>' +
@@ -222,9 +223,9 @@
                 var readonly = $original.prop("readonly")
                 $input.prop("disabled", disabled)
                 $input.prop("readonly", readonly)
-                $buttonIncrement.prop("disabled", !config.readOnlyInputs && (disabled || readonly))
-                $buttonDecrement.prop("disabled", !config.readOnlyInputs && (disabled || readonly))
-                if (!config.readOnlyInputs && (disabled || readonly)) {
+                $buttonIncrement.prop("disabled", (!config.readOnlyInputs && disabled) || readonly)
+                $buttonDecrement.prop("disabled", (!config.readOnlyInputs && disabled) || readonly)
+                if ((!config.readOnlyInputs && disabled) || readonly) {
                     resetTimer()
                 }
                 var originalClass = $original.prop("class")
@@ -237,7 +238,7 @@
                 }
                 var inputClass = originalClass.replace(/form-control(-(sm|lg))?/g, "")
                 $inputGroup.prop("class", "input-group " + groupClass + " " + config.groupClass)
-                $input.prop("class", "form-control " + inputClass)
+                $input.prop("class", "form-control " + inputClass + " " + config.inputClass)
 
                 // update the main attributes
                 min = parseFloat($original.prop("min")) || 0
