@@ -15,6 +15,7 @@
                 var element = this[0];
                 setTimeout(function () {
                     element.setValue(value)
+                    $(element).change()
                 })
             }
         }
@@ -115,6 +116,10 @@
                 newValue = parseLocaleNumber(newValue)
                 setValue(newValue, focusOut)
                 dispatchEvent($original, event.type)
+            })
+
+            $original.on("change", function () {
+                updateAttributes()
             })
 
             onPointerDown($buttonDecrement[0], function () {
