@@ -223,9 +223,12 @@
                 var readonly = $original.prop("readonly")
                 $input.prop("disabled", disabled)
                 $input.prop("readonly", readonly)
-                $buttonIncrement.prop("disabled", (!config.readOnlyInputs && disabled) || readonly)
-                $buttonDecrement.prop("disabled", (!config.readOnlyInputs && disabled) || readonly)
-                if ((!config.readOnlyInputs && disabled) || readonly) {
+                var isDisabled = (!config.readOnlyInputs && disabled) || readonly
+                var isIncrementDisabled = parseInt($input.val() || $original.val()) == parseInt($original.attr("max"))
+                var isDecrementDisabled = parseInt($input.val() || $original.val()) == parseInt($original.attr("min"))
+                $buttonIncrement.prop("disabled", isDisabled || isIncrementDisabled)
+                $buttonDecrement.prop("disabled", isDisabled || isDecrementDisabled)
+                if (isDisabled || isIncrementDisabled || isDecrementDisabled) {
                     resetTimer()
                 }
                 var originalClass = $original.prop("class")
