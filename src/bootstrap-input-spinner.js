@@ -37,7 +37,8 @@
             boostThreshold: 10, // boost after these steps
             boostMultiplier: "auto", // you can also set a constant number as multiplier
             locale: null, // the locale for number rendering; if null, the browsers language is used
-            disabledInput: false // make the text input disabled, while still allowing stepping
+            disabledInput: false, // make the text input disabled, while still allowing stepping
+            loopable: false // make the increment / decrement buttons automatically loop when reaching max / min
         }
         for (var option in options) {
             config[option] = options[option]
@@ -158,15 +159,15 @@
                 return isChanged
             }
 
-            function dispatchEvent($element, type, direction) {
+            function dispatchEvent($element, type, step) {
                 if (type) {
                     setTimeout(function () {
                         var event
                         if (typeof (CustomEvent) === 'function') {
-                            event = new CustomEvent(type, {bubbles: true, detail: {direction: direction}})
+                            event = new CustomEvent(type, {bubbles: true, detail: {step: step}})
                         } else { // IE
                             event = document.createEvent('Event')
-                            event.initEvent(type, true, true, {direction: direction})
+                            event.initEvent(type, true, true, {step: step})
                         }
                         $element[0].dispatchEvent(event)
                     })
@@ -204,12 +205,29 @@
                 if (isNaN(value)) {
                     value = 0
                 }
-                var isChanged = setValue(Math.round(value / step) * step + step)
+                
+                var newValue = value + step
+                
+                if (config.loopable) {
+                    
+                    var max = parseInt($original.prop("max"));
+                    var min = parseInt($original.prop("min"));
+                    
+                    // If bigger or smaller than max / min, get the delta, add it to the good side and remove 1 step (from max to min or vice versa)
+                    if (step > 0 && newValue > max) {
+                        newValue = newValue - max + min - 1
+                    }
+                    else if (step < 0 && newValue < min) {
+                        newValue = newValue - min + max + 1
+                    }
+                    
+                }
+                
+                var isChanged = setValue(newValue)
                 
                 if (isChanged) {
-                    var direction = step > 0 ? 1 : step < 0 ? -1 : 0
-                    dispatchEvent($original, "input", direction)
-                    dispatchEvent($original, "change", direction)
+                    dispatchEvent($original, "input", step)
+                    dispatchEvent($original, "change", step)
                 }
             }
 
@@ -229,8 +247,8 @@
                 $input.prop("disabled", disabled)
                 $input.prop("readonly", readonly)
                 var isDisabled = (!config.disabledInput && disabled) || readonly
-                var isIncrementDisabled = parseInt($input.val() || $original.val()) == parseInt($original.attr("max"))
-                var isDecrementDisabled = parseInt($input.val() || $original.val()) == parseInt($original.attr("min"))
+                var isIncrementDisabled = !config.loopable && parseInt($input.val() || $original.val()) == parseInt($original.attr("max"))
+                var isDecrementDisabled = !config.loopable && parseInt($input.val() || $original.val()) == parseInt($original.attr("min"))
                 $buttonIncrement.prop("disabled", isDisabled || isIncrementDisabled)
                 $buttonDecrement.prop("disabled", isDisabled || isDecrementDisabled)
                 if (isDisabled || isIncrementDisabled || isDecrementDisabled) {
