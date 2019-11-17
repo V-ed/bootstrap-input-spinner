@@ -102,8 +102,8 @@
             }
 
             var observer = new MutationObserver(function () {
-                updateAttributes()
                 setValue(value, true)
+                updateAttributes()
             })
             observer.observe($original[0], {attributes: true})
 
