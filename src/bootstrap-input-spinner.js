@@ -265,6 +265,10 @@
                 var inputClass = originalClass.replace(/form-control(-(sm|lg))?/g, "")
                 $inputGroup.prop("class", "input-group " + groupClass + " " + config.groupClass)
                 $input.prop("class", "form-control " + inputClass + " " + config.inputClass)
+                // data attributes
+                $.each($original.data(), function(name, value) {
+                    $input.attr(`data-${name}`, value)
+                })
 
                 // update the main attributes
                 min = parseFloat($original.prop("min")) || 0
