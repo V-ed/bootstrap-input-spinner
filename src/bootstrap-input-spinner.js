@@ -247,8 +247,8 @@
                 $input.prop("disabled", disabled)
                 $input.prop("readonly", readonly)
                 var isDisabled = (!config.disabledInput && disabled) || readonly
-                var isIncrementDisabled = !config.loopable && parseInt($input.val() || $original.val()) == parseInt($original.attr("max"))
-                var isDecrementDisabled = !config.loopable && parseInt($input.val() || $original.val()) == parseInt($original.attr("min"))
+                var isIncrementDisabled = !config.loopable && parseInt($original.val() || $input.val()) == parseInt($original.attr("max"))
+                var isDecrementDisabled = !config.loopable && parseInt($original.val() || $input.val()) == parseInt($original.attr("min"))
                 $buttonIncrement.prop("disabled", isDisabled || isIncrementDisabled)
                 $buttonDecrement.prop("disabled", isDisabled || isDecrementDisabled)
                 if (isDisabled || isIncrementDisabled || isDecrementDisabled) {
