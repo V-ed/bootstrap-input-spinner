@@ -149,11 +149,11 @@
                     newValue = parseFloat(newValue)
                     newValue = Math.min(Math.max(newValue, min), max)
                     newValue = Math.round(newValue * Math.pow(10, decimals)) / Math.pow(10, decimals)
+                    isChanged = $original[0].value == "" || value != newValue
                     $original[0].value = newValue
                     if (updateInput) {
                         $input[0].value = numberFormat.format(newValue)
                     }
-                    isChanged = value != newValue
                     value = newValue
                 }
                 return isChanged
